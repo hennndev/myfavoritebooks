@@ -16,7 +16,7 @@ router.get('/logout', (req, res, next) => {
 
 router.get('/auth/google', passport.authenticate("google", { scope: ["profile"] }))
 router.get('/auth/google/callback', passport.authenticate("google", {
-    successRedirect: 'http://localhost:5000',
+    successRedirect: 'https://myfavorite-books.herokuapp.com',
     failureRedirect: '/signin'
 }), (req, res) => {
     res.redirect('/')
