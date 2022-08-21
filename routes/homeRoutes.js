@@ -5,7 +5,7 @@ const Books = require('../models/Books')
 router.get('/', async(req, res) => {
     let books = []
     if(req.user) {
-        books = await Books.find({userId: req.user.googleId}).select("-updatedAt, -__v").sort({createdAt: -1})
+        books = await Books.find({}).select("-updatedAt, -__v").sort({createdAt: -1})
     }
     res.render('homepage', {title: 'Home Page', isAuth: req.isAuthenticated(), books, user: req.user})
 })
