@@ -136,7 +136,7 @@
         if(logout) {
             logout.addEventListener('click', (e) => {
                 e.preventDefault()
-                window.open('http://localhost:5000/logout', '_self')
+                window.open('https://myfavorite-books.herokuapp.com/logout', '_self')
             })
         }
         btnAdd.addEventListener('click', () => location.href = '/dashboard/add-favorite-book')
@@ -158,7 +158,7 @@
                     btnDel.addEventListener('click', () => {
                         btnLoading.classList.remove('d-none')
                         btnDel.classList.add('d-none')
-                        fetch(`http://localhost:5000/api/v1/books/${bookId}/${bookImageID}`, {
+                        fetch(`https://myfavorite-books.herokuapp.com/api/v1/books/${bookId}/${bookImageID}`, {
                             method: 'DELETE',
                             headers: {
                                 'Content-Type': 'application/json'

@@ -109,7 +109,7 @@
                     method: 'POST',
                     body: formDataImage
                 }).then(res => res.json()).then((image) => {
-                    fetch('http://localhost:5000/api/v1/books', {
+                    fetch('https://myfavorite-books.herokuapp.com/api/v1/books', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -154,7 +154,7 @@
 
         document.querySelector('.logout').addEventListener('click', (e) => {
             e.preventDefault()
-            window.open('http://localhost:5000/logout', '_self')
+            window.open('https://myfavorite-books.herokuapp.com/logout', '_self')
         })
     </script>
 </body>

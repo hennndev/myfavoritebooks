@@ -109,7 +109,7 @@
                     method: 'POST',
                     body: formDataImage
                 }).then(res => res.json()).then((image) => {
-                    fetch(`http://localhost:5000/api/v1/books/${paramId}`, {
+                    fetch(`https://myfavorite-books.herokuapp.com/api/v1/books/${paramId}`, {
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json'
@@ -131,7 +131,7 @@
                     })
                 })
             } else {
-                fetch(`http://localhost:5000/api/v1/books/${paramId}`, {
+                fetch(`https://myfavorite-books.herokuapp.com/api/v1/books/${paramId}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
@@ -149,7 +149,7 @@
             }
         })
 
-        fetch(`http://localhost:5000/api/v1/books/${paramId}`).then(res => res.json()).then((data) => {
+        fetch(`https://myfavorite-books.herokuapp.com/api/v1/books/${paramId}`).then(res => res.json()).then((data) => {
             bookName.value = data.book.bookName
             bookAuthor.value = data.book.bookAuthor
             bookDesc.value = data.book.bookDesc
@@ -161,7 +161,7 @@
 
         document.querySelector('.logout').addEventListener('click', (e) => {
             e.preventDefault()
-            window.open('http://localhost:5000/logout', '_self')
+            window.open('https://myfavorite-books.herokuapp.com/logout', '_self')
         })
     </script>
 </body>
