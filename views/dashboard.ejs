@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css">
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="/">MyFavoriteBooks</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+                <div class="navbar-nav">
+                    <a class="nav-link active" aria-current="page" href="/">Homepage</a>
+                    <% if(isAuth) { %>
+                        <a class="nav-link" href="/dashboard">Dashboard</a>
+                    <% } %>
+                    
+                    <% if(isAuth) { %>
+                        <% if(user) { %>
+                            <a class="nav-link"><%= user.displayName %> <span style="cursor:pointer" class="ms-2 text-danger logout">(Logout)</span></a>
+                        <% } %>
+                    <% } else { %>
+                        <a class="nav-link" href="/signin">Signin</a>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="container mt-5">
+        <div class="d-md-flex mb-3 align-items-center justify-content-between mb-3">
+            <h2 class="mb-3 mb-md-0">My Dashboard</h2>
+            <button class="btn-primary btn addForm">Add favorite book</button>
+        </div>
+        <div class="modal fade" id="delete" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Delete book</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure want to delete this book ?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btnClose" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-danger btnDel">Delete now</button>
+                    <button class="btn btn-danger me-3 btnLoading d-none" type="button" disabled>
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        Loading...
+                    </button>
+                </div>
+                </div>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col" class="align-middle text-center text-nowrap">No</th>
+                        <th scope="col" class="align-middle text-center text-nowrap">Book Image</th>
+                        <th scope="col" class="align-middle text-center text-nowrap">Book Name</th>
+                        <th scope="col" class="align-middle text-center text-nowrap">Book Author</th>
+                        <th scope="col" class="align-middle text-center text-nowrap">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if(books.length > 0) { %>
+                        <% books.forEach((book, idx) => { %>
+                            <tr class="book-row" data-bookid="<%= book._id %>">
+                                <th class="align-middle text-center text-nowrap">
+                                    <%= idx+1 %>
+                                </th>
+                                <td class="align-middle text-center text-nowrap">
+                                    <img src="<%= book.bookImage.bookImageURL %>" alt="book-image">
+                                </td>
+                                <td class="align-middle text-center text-nowrap">
+                                    <%= book.bookName %>
+                                </td>
+                                <td class="align-middle text-center text-nowrap">
+                                    <%= book.bookAuthor %>
+                                </td>
+                                <td class="align-middle text-center text-nowrap">
+                                    <button class="btn btn-primary btn-sm btnEdit" data-bookid="<%= book._id %>">Edit</button>
+                                    <button class="btn btn-danger btn-sm btnModal" data-bs-toggle="modal" data-bs-target="#delete" data-bookid="<%= book._id %>" data-bookimgid="<%= book.bookImage.bookImageID %>">Delete</button>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <th class="align-middle text-center text-nowrap">
+                                empty
+                            </th>
+                            <td class="align-middle text-center text-nowrap">
+                                empty
+                            </td>
+                            <td class="align-middle text-center text-nowrap">
+                                empty
+                            </td>
+                            <td class="align-middle text-center text-nowrap">
+                                empty
+                            </td>
+                            <td class="align-middle text-center text-nowrap">
+                                empty
+                            </td>
+                        </tr>    
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+
+
+    <%- include('./layout/footer.ejs') %>
+
+
+
+    <script>
+        const btnEdit = document.querySelectorAll('.btnEdit')
+        const btnAdd = document.querySelector('.addForm')
+        const btnDel = document.querySelector('.btnDel')
+        const logout = document.querySelector('.logout')
+        const btnModals = document.querySelectorAll('.btnModal')
+        const btnLoading = document.querySelector('.btnLoading')
+
+        if(logout) {
+            logout.addEventListener('click', (e) => {
+                e.preventDefault()
+                window.open('http://localhost:5000/logout', '_self')
+            })
+        }
+        btnAdd.addEventListener('click', () => location.href = '/dashboard/add-favorite-book')
+
+        btnEdit.forEach(btn => {
+            btn.addEventListener('click', () => {
+                location.href = `/dashboard/edit-favorite-book/${btn.dataset.bookid}`
+            })
+        })
+
+        let bookId
+        let bookImageID
+
+        btnModals.forEach(btn => {
+            btn.addEventListener('click', () => {
+                bookId = btn.dataset.bookid
+                bookImageID = btn.dataset.bookimgid
+                if(document.querySelector('.modal')) {
+                    btnDel.addEventListener('click', () => {
+                        btnLoading.classList.remove('d-none')
+                        btnDel.classList.add('d-none')
+                        fetch(`http://localhost:5000/api/v1/books/${bookId}/${bookImageID}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                        }).then(res => res.json()).then(() => {
+                            btnLoading.classList.add('d-none')
+                            btnDel.classList.remove('d-none')
+                            document.querySelector('.btnClose').click()
+                            window.location.reload()
+                        })
+                    })
+                }
+            })
+        })
+
+
+    </script>
+</body>
+</html>

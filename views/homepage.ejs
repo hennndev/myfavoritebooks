@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="/">MyFavoriteBooks</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+                <div class="navbar-nav">
+                    <a class="nav-link active" aria-current="page" href="/">Homepage</a>
+                    <% if(isAuth) { %>
+                        <a class="nav-link" href="/dashboard">Dashboard</a>
+                    <% } %>
+                    
+                    <% if(isAuth) { %>
+                        <% if(user) { %>
+                            <a class="nav-link"><%= user.displayName %> <span style="cursor:pointer" class="ms-2 text-danger logout">(Logout)</span></a>
+                        <% } %>
+                    <% } else { %>
+                        <a class="nav-link" href="/signin">Signin</a>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="container text-center mt-5 p-1">
+        <div class="row ">
+            <% if(!isAuth) { %>
+                <div class="d-flex text-center align-items-center justify-content-center flex-column">
+                    <h4>Favorite books not available, please signin</h4>
+                    <button class="btn btn-primary mt-3 signin">Signin Now</button>
+                </div>    
+            <% } else { %>
+                <% if(books.length > 0) { %>
+                    <% books.forEach(book => { %>
+                        <div class="card card-book col-12 col-sm-6 col-md-4 col-lg-3">
+                            <div class="card-body">
+                            <img src="<%= book.bookImage.bookImageURL %>" class="image-card" alt="...">
+                              <h5 class="card-title"><%= book.bookName %></h5>
+                              <h6 class="card-subtitle mb-2 text-muted"><%= book.bookAuthor %></h6>
+                              <p class="card-text"><%= book.bookDesc.length > 50 ? `${book.bookDesc.slice(0, 50)}...` : book.bookDesc %></p>
+                              <a href="/favorite-books/<%= book._id %>" class="card-link">See more</a>
+                            </div>
+                        </div>
+                    <% }) %>
+                <% } else { %>
+                    <div class="d-flex text-center align-items-center justify-content-center flex-column">
+                        <h3>Your favorite books not available</h3>
+                        <button class="btn btn-primary mt-3 btnAdd">Add new favorite book</button>
+                    </div>    
+                <% } %>
+            <% } %>
+        </div>
+    </section>
+
+
+    <%- include('./layout/footer.ejs') %>
+
+
+    <script>
+        const signin = document.querySelector('.signin')
+        const logout = document.querySelector('.logout')
+        const btnAdd = document.querySelector('.btnAdd')
+
+        if(signin) {
+            signin.addEventListener('click', () => location.href = '/signin')
+        }
+        if(btnAdd) {
+            btnAdd.addEventListener('click', () => location.href ='/dashboard/add-favorite-book')
+        }
+
+        if(logout) {
+            logout.addEventListener('click', (e) => {
+                e.preventDefault()
+                window.open('http://localhost:5000/logout', '_self')
+            })
+        }
+    </script>
+</body>
+</html>

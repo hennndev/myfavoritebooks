@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css">
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="/">MyFavoriteBooks</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+                <div class="navbar-nav">
+                    <a class="nav-link active" aria-current="page" href="/">Homepage</a>
+                    <% if(isAuth) { %>
+                        <a class="nav-link" href="/dashboard">Dashboard</a>
+                    <% } %>
+                    
+                    <% if(isAuth) { %>
+                        <% if(user) { %>
+                            <a class="nav-link"><%= user.displayName %> <span style="cursor:pointer" class="ms-2 text-danger logout">(Logout)</span></a>
+                        <% } %>
+                    <% } else { %>
+                        <a class="nav-link" href="/signin">Signin</a>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="container d-flex align-items-center justify-content-center mt-5">
+        <div class="d-grid col-12 col-lg-6">
+            <form class="border rounded-2 py-4 px-4" id="editForm">
+                <h3 class="text-center mb-3">Edit Favorite Book</h3>
+                <div class="mb-3">
+                    <label for="bookName" class="form-label">Book Name</label>
+                    <input type="text" required class="form-control" id="bookName" placeholder="Input book name">
+                </div>
+                <div class="mb-3">
+                    <label for="bookAuthor" class="form-label">Book Author</label>
+                    <input type="text" required class="form-control" id="bookAuthor" placeholder="Input book author">
+                </div>
+                <div class="mb-3">
+                    <label for="bookDesc" class="form-label">Book Description</label>
+                    <textarea class="form-control" required id="bookDesc" rows="5" placeholder="Input book description..."></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="bookImage" class="form-label">Book Image</label>
+                    <input type="file" class="form-control" id="bookImage" accept="image/*">
+                    <div class="preview-image"></div>
+                </div>
+                <div class="d-flex align-items-center justify-content-center">
+                    <button type="submit" class="btn btn-primary me-3 btnSubmit">Submit</button>
+                    <button class="btn btn-primary me-3 btnLoading d-none" type="button" disabled>
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        Loading...
+                    </button>
+                    <button type="button" class="btn btn-danger">Clear</button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <%- include('./layout/footer.ejs') %>
+
+
+    <script>
+        const bookName = document.getElementById('bookName')
+        const bookAuthor = document.getElementById('bookAuthor')
+        const bookDesc = document.getElementById('bookDesc')
+        const bookImage = document.getElementById('bookImage')
+        const editForm = document.getElementById('editForm')
+        const btnSubmit = document.querySelector('.btnSubmit')
+        const btnLoading = document.querySelector('.btnLoading')
+        const btnClear = document.querySelector('.btnClear')
+        const previewImage = document.querySelector('.preview-image')
+        const paramId = location.pathname.split('/').reverse()[0]
+
+        bookImage.addEventListener('change', (e) => handlePreviewImage(e.target.files[0]))
+
+        function handlePreviewImage(image) {
+            const readerImg = new FileReader()
+            readerImg.readAsDataURL(image)
+            readerImg.onloadend = () => {
+                document.querySelector('.preview-image').innerHTML = `
+                    <img src="${readerImg.result}" alt="preview-image"/>
+                `
+            }
+        }
+ 
+        editForm.addEventListener('submit', async (e) => {
+            e.preventDefault()
+            btnSubmit.classList.add('d-none')
+            btnLoading.classList.remove('d-none')  
+            
+            if(bookImage.files[0]) {
+                const formDataImage = new FormData()
+                formDataImage.append('file', bookImage.files[0])
+                formDataImage.append('upload_preset', 'qzxb5iq7')
+                fetch('https://api.cloudinary.com/v1_1/hennnpermanadev/image/upload', {
+                    method: 'POST',
+                    body: formDataImage
+                }).then(res => res.json()).then((image) => {
+                    fetch(`http://localhost:5000/api/v1/books/${paramId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            bookName: bookName.value,
+                            bookAuthor: bookAuthor.value,
+                            bookDesc: bookDesc.value,
+                            oldBookImageID: document.querySelector('.preview-image').dataset.bookimgid,
+                            bookImage: {
+                                bookImageURL: image.url,
+                                bookImageID: image.public_id,
+                            }
+                        })
+                    }).then(res => res.json()).then(() => {
+                        btnSubmit.classList.remove('d-none')
+                        btnLoading.classList.add('d-none')
+                        location.replace('/dashboard')
+                    })
+                })
+            } else {
+                fetch(`http://localhost:5000/api/v1/books/${paramId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        bookName: bookName.value,
+                        bookAuthor: bookAuthor.value,
+                        bookDesc: bookDesc.value,
+                    })
+                }).then(res => res.json()).then(() => {
+                    btnSubmit.classList.remove('d-none')
+                    btnLoading.classList.add('d-none')
+                    location.replace('/dashboard')         
+                })
+            }
+        })
+
+        fetch(`http://localhost:5000/api/v1/books/${paramId}`).then(res => res.json()).then((data) => {
+            bookName.value = data.book.bookName
+            bookAuthor.value = data.book.bookAuthor
+            bookDesc.value = data.book.bookDesc
+            document.querySelector('.preview-image').setAttribute('data-bookimgid', data.book.bookImage.bookImageID)
+            document.querySelector('.preview-image').innerHTML = `
+                <img src="${data.book.bookImage.bookImageURL}" alt="preview-image"/>
+            `
+        })
+
+        document.querySelector('.logout').addEventListener('click', (e) => {
+            e.preventDefault()
+            window.open('http://localhost:5000/logout', '_self')
+        })
+    </script>
+</body>
+</html>
