@@ -6,7 +6,7 @@ const Users = require('../models/Users')
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "/auth/google/callback"
+    callbackURL: "https://myfavorite-books.herokuapp.com/auth/google/callback"
 }, 
     async function(accessToken, refreshToken, profile, done) {
         const newUser = {
